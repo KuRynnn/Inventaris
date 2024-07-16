@@ -1,17 +1,16 @@
 // app/movement-request-transaction/page.js
 'use client';
 
-import React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import AppBar from '../components/AppBar';
 import FlexibleTable from '../components/FlexibleTable';
 import Button from '../components/Button';
+import withAuth from '../components/withAuth';
 
 const RequestManagementPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get('role');
 
   const items = [
     { id: 1, no: 1, namaBarang: 'kabel HDMI', jumlah: 1, ruanganAwal: 'F1', ruanganPemindahan: 'F2' },
@@ -33,7 +32,7 @@ const RequestManagementPage = () => {
         <Button 
           variant="detail" 
           size="small" 
-          onClick={() => router.push(`/movement-request-transaction/${item.id}?role=${role}`)}
+          onClick={() => router.push(`/movement-request-transaction/${item.id}`)}
         >
           detail
         </Button>
@@ -57,8 +56,8 @@ const RequestManagementPage = () => {
           </div>
           <div className="mt-4 flex justify-between items-center">
             <div className="flex space-x-2">
-              <Button variant="secondary" onClick={() => router.push(`/movement-request-transaction?role=${role}&page=prev`)}>previous</Button>
-              <Button variant="secondary" onClick={() => router.push(`/movement-request-transaction?role=${role}&page=next`)}>next</Button>
+              <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=prev')}>previous</Button>
+              <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=next')}>next</Button>
             </div>
             <span className="text-black">Page 1 of 1</span>
           </div>
@@ -69,3 +68,4 @@ const RequestManagementPage = () => {
 };
 
 export default RequestManagementPage;
+//export default withAuth(RequestManagementPage, ['admin', 'petugas']);

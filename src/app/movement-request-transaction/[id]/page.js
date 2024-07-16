@@ -1,19 +1,18 @@
 // src/app/movement-request-transaction/[id]/page.js
 'use client';
 
-import React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
-import Sidebar from '../../components//Sidebar';
+import Sidebar from '../../components/Sidebar';
 import AppBar from '../../components/AppBar';
 import Button from '../../components/Button';
 
 const DetailPemindahanPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const params = useParams();
   const id = params.id;
-  const role = searchParams.get('role');
+  const [role, setRole] = useState(null);
 
   // Mock data - in a real app, you'd fetch this based on the id
   const itemDetail = {
@@ -26,12 +25,17 @@ const DetailPemindahanPage = () => {
     detailPemindahan: 'Ruangan F2',
   };
 
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    setRole(storedRole);
+  }, []);
+
   const handleAccept = () => {
-    router.push(`/movement-request-transaction/${id}/nota-dinas?role=${role}`);
+    router.push(`/movement-request-transaction/${id}/nota-dinas`);
   };
 
   const handleReject = () => {
-    router.push(`/movement-request-transaction?role=${role}`);
+    router.push('/movement-request-transaction');
   };
 
   return (
@@ -52,11 +56,15 @@ const DetailPemindahanPage = () => {
               <p><strong>Detail Pemindahan:</strong> {itemDetail.detailPemindahan}</p>
             </div>
             <div className="mt-6 flex justify-center space-x-4">
-              <Button variant="primary" onClick={handleAccept}>Accept</Button>
-              <Button variant="danger" onClick={handleReject}>Reject</Button>
+              {role === 'admin' && (
+                <>
+                  <Button variant="primary" onClick={handleAccept}>Accept</Button>
+                  <Button variant="danger" onClick={handleReject}>Reject</Button>
+                </>
+              )}
             </div>
           </div>
-          <Button variant="secondary" className="mt-4" onClick={() => router.push(`/movement-request-transaction?role=${role}`)}>Back</Button>
+          <Button variant="secondary" className="mt-4" onClick={() => router.push('/movement-request-transaction')}>Back</Button>
         </div>
       </div>
     </div>
@@ -64,3 +72,4 @@ const DetailPemindahanPage = () => {
 };
 
 export default DetailPemindahanPage;
+//export default withAuth(DetailPemindahanPage, ['admin', 'petugas']);

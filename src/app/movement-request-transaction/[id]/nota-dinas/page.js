@@ -1,19 +1,18 @@
 // src/app/movement-request-transaction/[id]/nota-dinas/page.js
 'use client';
 
-import React from 'react';
-import { useRouter, useSearchParams} from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import Sidebar from '../../../components/Sidebar';
 import AppBar from '../../../components/AppBar';
 import Button from '../../../components/Button';
+import withAuth from '../../../components/withAuth';
 
 const NotaDinasPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const params = useParams();
   const id = params.id;
-  const role = searchParams.get('role');
 
   // Mock data - in a real app, you'd fetch this based on the id
   const itemDetail = {
@@ -51,7 +50,7 @@ const NotaDinasPage = () => {
             </div>
           </div>
           <div className="mt-6 flex justify-between">
-            <Button variant="secondary" onClick={() => router.push(`/movement-request-transaction/${id}?role=${role}`)}>Back</Button>
+            <Button variant="secondary" onClick={() => router.push(`/movement-request-transaction/${id}`)}>Back</Button>
             <Button variant="primary" onClick={handleDownloadPDF}>Download PDF</Button>
           </div>
         </div>
@@ -61,3 +60,4 @@ const NotaDinasPage = () => {
 };
 
 export default NotaDinasPage;
+//export default withAuth(NotaDinasPage, ['admin']);

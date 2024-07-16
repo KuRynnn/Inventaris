@@ -3,10 +3,9 @@ import React from 'react';
 import Link from 'next/link';
 import Button from './Button';
 
-const NavButton = ({ href, icon: Icon, children, isActive, role }) => {
-  const fullHref = `${href}?role=${role}`;
+const NavButton = ({ href, icon: Icon, children, isActive }) => {
   return (
-    <Link href={fullHref} passHref className="w-full block px-2">
+    <Link href={href} passHref className="w-full block px-2">
       <Button 
         variant={isActive ? 'primary' : 'nav'} 
         className={`w-full text-left flex items-center`}

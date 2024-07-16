@@ -1,8 +1,7 @@
-// app/item-management/page.js
 'use client';
 
-import React, { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import AppBar from '../components/AppBar';
 import StatCard from '../components/StatCard';
@@ -10,15 +9,13 @@ import FlexibleTable from '../components/FlexibleTable';
 import Button from '../components/Button';
 
 const ItemManagementPage = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const role = searchParams.get('role') || 'petugas';
-
+  const [role, setRole] = useState(null);
   const [activeTab, setActiveTab] = useState('Barang Inventaris');
   const [inventoryItems, setInventoryItems] = useState([
     { id: 1, no: 1, namaBarang: 'kabel HDMI', jumlah: 3, supplier: 'PT Asikin Aja' },
     { id: 2, no: 2, namaBarang: 'proyektor', jumlah: 5, supplier: 'PT Asikin Aja' },
-    // ... other itemsw
+    // ... other items
   ]);
 
   const [consumableItems, setConsumableItems] = useState([
@@ -27,23 +24,28 @@ const ItemManagementPage = () => {
     // ... other items
   ]);
 
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    setRole(storedRole);
+  }, []);
+
   const handleDelete = (itemId) => {
     console.log(`Delete item with id: ${itemId}`);
     // Implement delete logic here
   };
 
   const handleDetail = (itemId) => {
-    router.push(`/item-management/${itemId}?role=${role}`);
+    router.push(`/item-management/${itemId}`);
   };
-  
+
   const inventoryColumns = [
-    { key: 'no', title: 'No', align: 'center'},
+    { key: 'no', title: 'No', align: 'center' },
     { key: 'namaBarang', title: 'Nama Barang' },
     { key: 'jumlah', title: 'Jumlah' },
     { key: 'supplier', title: 'Supplier' },
-    { 
-      key: 'action', 
-      title: 'Action', 
+    {
+      key: 'action',
+      title: 'Action',
       render: (_, item) => (
         <div className="flex space-x-2">
           {role === 'admin' && (
@@ -67,7 +69,7 @@ const ItemManagementPage = () => {
   ];
 
   const consumableColumns = [
-    { key: 'no', title: 'No' },
+    { key: 'no', title: 'No', align: 'center' },
     { key: 'namaBarang', title: 'Nama Barang' },
     { key: 'jumlah', title: 'Jumlah' },
     { key: 'supplier', title: 'Supplier' },
@@ -139,19 +141,23 @@ const ItemManagementPage = () => {
                 </div>
               )}
             </div>
-            <FlexibleTable 
-              columns={activeTab === 'Barang Inventaris' ? inventoryColumns : consumableColumns} 
-              data={activeTab === 'Barang Inventaris' ? inventoryItems : consumableItems} 
-              rowKeyField="id" 
+            <FlexibleTable
+              columns={activeTab === 'Barang Inventaris' ? inventoryColumns : consumableColumns}
+              data={activeTab === 'Barang Inventaris' ? inventoryItems : consumableItems}
+              rowKeyField="id"
             />
           </div>
           <div className="mt-4 flex justify-between items-center">
-              <div className="flex space-x-2">
-                <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=prev')}>previous</Button>
-                <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=next')}>next</Button>
-              </div>
-              <span className="text-black">Page 1 of 1</span>
+            <div className="flex space-x-2">
+              <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=prev')}>
+                previous
+              </Button>
+              <Button variant="secondary" onClick={() => router.push('/movement-request-transaction?page=next')}>
+                next
+              </Button>
             </div>
+            <span className="text-black">Page 1 of 1</span>
+          </div>
         </div>
       </div>
     </div>
@@ -159,3 +165,4 @@ const ItemManagementPage = () => {
 };
 
 export default ItemManagementPage;
+//export default withAuth(ItemManagementPage, ['admin', 'petugas']);

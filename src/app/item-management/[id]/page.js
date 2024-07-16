@@ -1,19 +1,18 @@
 // src/app/item-management/[id]/page.js
 'use client';
 
-import React from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import AppBar from '../../components/AppBar';
 import Sidebar from '../../components/Sidebar';
 import ItemDetail from '../../components/ItemDetail';
 import FlexibleTable from '../../components/FlexibleTable';
 import Button from '../../components/Button';
+import withAuth from '../../components/withAuth';
 
 const ItemDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const role = searchParams.get('role') || 'petugas';
 
   // Mock data for the item detail
   const itemDetail = {
@@ -40,7 +39,7 @@ const ItemDetailPage = () => {
   ];
 
   const handleBack = () => {
-    router.push(`/item-management?role=${role}`);
+    router.push('/item-management');
   };
 
   return (
@@ -59,13 +58,13 @@ const ItemDetailPage = () => {
             />
           </div>
           <div className="flex justify-between items-center p-4 border-t">
-              <Button variant="secondary" onClick={handleBack}>back</Button>
-              <div className="flex items-center space-x-2">
-                <Button variant="secondary">previous</Button>
-                <Button variant="secondary">next</Button>
-              </div>
-              <span className="text-sm text-gray-500">Page 1 of 7</span>
+            <Button variant="secondary" onClick={handleBack}>back</Button>
+            <div className="flex items-center space-x-2">
+              <Button variant="secondary">previous</Button>
+              <Button variant="secondary">next</Button>
             </div>
+            <span className="text-sm text-gray-500">Page 1 of 7</span>
+          </div>
         </div>
       </div>
     </div>
@@ -73,3 +72,4 @@ const ItemDetailPage = () => {
 };
 
 export default ItemDetailPage;
+//export default withAuth(ItemDetailPage, ['admin', 'petugas']);
