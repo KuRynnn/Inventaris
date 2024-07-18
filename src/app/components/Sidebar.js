@@ -26,7 +26,7 @@ const Sidebar = () => {
 
   return (
     <div className="w-72 bg-white p-4 flex flex-col h-screen">
-      <h1 className="text-blue-800 font-bold text-xl mb-6 text-center">InventoryApp</h1>
+      <h1 className="text-blue-800 font-bold text-xl mb-6 text-center">Vento</h1>
       <NavItems role={role} />
       <Button
         variant="secondary"
