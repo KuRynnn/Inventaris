@@ -1,42 +1,65 @@
-// src/app/movement-request-transaction/[id]/page.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import AppBar from '../../components/AppBar';
 import Button from '../../components/Button';
+import api from '../../../utils/api';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
 
 const DetailPemindahanPage = () => {
   const router = useRouter();
   const params = useParams();
-  const id = params.id;
-  const [role, setRole] = useState(null);
-
-  // Mock data - in a real app, you'd fetch this based on the id
-  const itemDetail = {
-    namaBarang: 'Kabel HDMI',
-    qty: 1,
-    namaPeminjam: 'Rama Padiliwinata',
-    nip: '1010101010',
-    waktuPinjam: '10:00 AM / Jumat, 07/06/2024',
-    waktuPemindahan: '2:00 PM / Jumat, 07/06/2024',
-    detailPemindahan: 'Ruangan F2',
-  };
+  const { user } = useAuth();
+  const { loading: authLoading } = useProtectedRoute(['admin', 'petugas']);
+  const [request, setRequest] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedRole = localStorage.getItem('role');
-    setRole(storedRole);
-  }, []);
+    if (user) {
+      fetchRequestDetail();
+    }
+  }, [user, params.id]);
 
-  const handleAccept = () => {
-    router.push(`/movement-request-transaction/${id}/nota-dinas`);
+  const fetchRequestDetail = async () => {
+    try {
+      const { data } = await api.get(`/movement-requests/${params.id}`);
+      setRequest(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching request detail:', error);
+      setError('Failed to load request details');
+      setIsLoading(false);
+    }
   };
 
-  const handleReject = () => {
-    router.push('/movement-request-transaction');
+  const handleAccept = async () => {
+    try {
+      await api.put(`/movement-requests/${params.id}`, { status: 'approved' });
+      router.push(`/movement-request-transaction/${params.id}/nota-dinas`);
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      alert('Failed to accept request');
+    }
   };
+
+  const handleReject = async () => {
+    try {
+      await api.put(`/movement-requests/${params.id}`, { status: 'rejected' });
+      router.push('/movement-request-transaction');
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      alert('Failed to reject request');
+    }
+  };
+
+  if (authLoading || isLoading) return <LoadingSpinner />;
+  if (error) return <div>Error: {error}</div>;
+  if (!user || !request) return null;
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
@@ -47,16 +70,16 @@ const DetailPemindahanPage = () => {
           <h2 className="text-2xl font-bold mb-6 text-black">Detail Pemindahan Barang</h2>
           <div className="bg-white rounded-lg shadow p-6">
             <div className="grid grid-cols-2 gap-4 text-black">
-              <p><strong>Nama Barang:</strong> {itemDetail.namaBarang}</p>
-              <p><strong>Qty:</strong> {itemDetail.qty}</p>
-              <p><strong>Nama Peminjam:</strong> {itemDetail.namaPeminjam}</p>
-              <p><strong>NIP:</strong> {itemDetail.nip}</p>
-              <p><strong>Waktu Pinjam:</strong> {itemDetail.waktuPinjam}</p>
-              <p><strong>Waktu Pemindahan:</strong> {itemDetail.waktuPemindahan}</p>
-              <p><strong>Detail Pemindahan:</strong> {itemDetail.detailPemindahan}</p>
+              <p><strong>Nama Barang:</strong> {request.itemName}</p>
+              <p><strong>Qty:</strong> {request.quantity}</p>
+              <p><strong>Nama Peminjam:</strong> {request.requestedBy}</p>
+              <p><strong>NIP:</strong> {request.nip}</p>
+              <p><strong>Waktu Pinjam:</strong> {request.createdAt}</p>
+              <p><strong>Waktu Pemindahan:</strong> {request.moveTime}</p>
+              <p><strong>Detail Pemindahan:</strong> From {request.fromLocation} to {request.toLocation}</p>
             </div>
             <div className="mt-6 flex justify-center space-x-4">
-              {role === 'admin' && (
+              {user.role === 'admin' && (
                 <>
                   <Button variant="primary" onClick={handleAccept}>Accept</Button>
                   <Button variant="danger" onClick={handleReject}>Reject</Button>
@@ -72,4 +95,3 @@ const DetailPemindahanPage = () => {
 };
 
 export default DetailPemindahanPage;
-//export default withAuth(DetailPemindahanPage, ['admin', 'petugas']);

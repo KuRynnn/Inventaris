@@ -1,4 +1,3 @@
-// src/app/item-management/[id]/page.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,39 +7,70 @@ import Sidebar from '../../components/Sidebar';
 import ItemDetail from '../../components/ItemDetail';
 import FlexibleTable from '../../components/FlexibleTable';
 import Button from '../../components/Button';
-import withAuth from '../../components/withAuth';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useProtectedRoute } from '../../../hooks/useProtectedRoute';
+import api from '../../../utils/api';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const ItemDetailPage = () => {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const { loading: authLoading } = useProtectedRoute([0, 1]);
+  const [itemDetail, setItemDetail] = useState(null);
+  const [itemInstances, setItemInstances] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Mock data for the item detail
-  const itemDetail = {
-    namaBarang: 'Kabel HDMI',
-    qty: 1,
-    jenisBarang: 'Inventaris Kelas',
-    supplier: 'PT Asikin Aja',
-    ruangan: 'Ruangan F1',
-    pemindahanTerakhir: '14:00 / Jumat, 07/06/2024',
+  useEffect(() => {
+    if (user) {
+      fetchItemDetail();
+      fetchItemInstances();
+    }
+  }, [user, id, page]);
+
+  const fetchItemDetail = async () => {
+    try {
+      const { data } = await api.get(`/items/${id}`);
+      setItemDetail(data);
+    } catch (error) {
+      console.error('Error fetching item detail:', error);
+      setError('Failed to load item detail');
+    }
   };
 
-  const itemInstances = [
-    { no: 1, namaBarang: 'Kabel HDMI', jumlah: 1, kondisiBarang: 'Baik', ruangan: 'F1' },
-    { no: 2, namaBarang: 'Kabel HDMI', jumlah: 1, kondisiBarang: 'Kerusakan Minor', ruangan: 'F2' },
-    { no: 3, namaBarang: 'Kabel HDMI', jumlah: 1, kondisiBarang: 'Kerusakan Mayor', ruangan: 'F3' },
-  ];
-
-  const columns = [
-    { key: 'no', title: 'No' },
-    { key: 'namaBarang', title: 'Nama Barang' },
-    { key: 'jumlah', title: 'Jumlah' },
-    { key: 'kondisiBarang', title: 'Kondisi Barang' },
-    { key: 'ruangan', title: 'Ruangan' },
-  ];
+  const fetchItemInstances = async () => {
+    try {
+      const { data } = await api.get(`/items/${id}/instances`, {
+        params: { page, limit: 10 }
+      });
+      setItemInstances(data.instances);
+      setTotalPages(data.totalPages);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching item instances:', error);
+      setError('Failed to load item instances');
+      setIsLoading(false);
+    }
+  };
 
   const handleBack = () => {
     router.push('/item-management');
   };
+
+  const handlePrevPage = () => {
+    setPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  if (authLoading || isLoading) return <LoadingSpinner />;
+  if (error) return <div>Error: {error}</div>;
+  if (!user || !itemDetail) return null;
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
@@ -48,22 +78,10 @@ const ItemDetailPage = () => {
       <div className="flex-1">
         <AppBar title="Manajemen Barang" />
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6 text-black">Detail Barang Inventaris</h2>
+          <h2 className="text-2xl font-bold mb-6 text-black">Detail Barang</h2>
           <ItemDetail itemDetail={itemDetail} />
-          <div className="bg-white rounded-lg shadow mt-6">
-            <FlexibleTable
-              columns={columns}
-              data={itemInstances}
-              rowKeyField="no"
-            />
-          </div>
-          <div className="flex justify-between items-center p-4 border-t">
-            <Button variant="secondary" onClick={handleBack}>back</Button>
-            <div className="flex items-center space-x-2">
-              <Button variant="secondary">previous</Button>
-              <Button variant="secondary">next</Button>
-            </div>
-            <span className="text-sm text-gray-500">Page 1 of 7</span>
+          <div className="mt-6">
+            <Button variant="secondary" onClick={handleBack}>Back</Button>
           </div>
         </div>
       </div>
@@ -72,4 +90,3 @@ const ItemDetailPage = () => {
 };
 
 export default ItemDetailPage;
-//export default withAuth(ItemDetailPage, ['admin', 'petugas']);

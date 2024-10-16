@@ -1,33 +1,24 @@
-// components/Sidebar.js
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Button from './Button';
 import NavItems from './NavItems';
 import { RiLogoutBoxLine } from 'react-icons/ri';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = () => {
-  const [role, setRole] = useState(null);
-  const router = useRouter();
+  const { user, logout } = useAuth();
 
-  useEffect(() => {
-    setRole(localStorage.getItem('role'));
-  }, []);
-
-  const handleLogout = () => {
-    // Remove the role from localStorage
-    localStorage.removeItem('role');
-    // Navigate to the /auth route
-    router.push('/auth');
+  const handleLogout = async () => {
+    await logout();
   };
 
-  if (role === null) {
+  if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="w-72 bg-white p-4 flex flex-col h-screen">
       <h1 className="text-blue-800 font-bold text-xl mb-6 text-center">Vento</h1>
-      <NavItems role={role} />
+      <NavItems role={user.role} />
       <Button
         variant="secondary"
         className="mt-4 w-full flex items-center justify-start hover:bg-gray-100"
